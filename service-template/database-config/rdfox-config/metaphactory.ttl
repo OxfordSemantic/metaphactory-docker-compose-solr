@@ -1,19 +1,42 @@
-@prefix rep: <http://www.openrdf.org/config/repository#> .
-@prefix sail: <http://www.openrdf.org/config/sail#> .
-@prefix sr: <http://www.openrdf.org/config/repository/sail#> .
+@prefix pathfinder: <http://www.metaphacts.com/ontologies/platform/service/pathfinder/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix search: <http://www.metaphacts.com/ontologies/platform/service/search/> .
+@prefix config: <tag:rdf4j.org,2023:config/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix mph: <http://www.metaphacts.com/ontologies/platform/repository#> .
 @prefix ephedra: <http://www.metaphacts.com/ontologies/platform/ephedra#> .
-@prefix fedsail: <http://www.openrdf.org/config/sail/federation#> .
-@prefix sparqlr: <http://www.openrdf.org/config/repository/sparql#> .
 
-[] a rep:Repository;
-  rep:repositoryID "default";
+[] a config:Repository;
+  config:rep.id "default";
   rdfs:label "RDFox repository";
-  rep:repositoryImpl [
-      rep:repositoryType "metaphactory:RDFoxRepository";
-      sparqlr:query-endpoint <http://rdfox:12110/datastores/metaphactory/sparql>;
+  config:rep.impl [
+      config:rep.type "metaphactory:RDFoxRepository";
+      config:sparql.queryEndpoint <http://rdfox:12110/datastores/metaphactory/sparql>;
       mph:quadMode true;
       mph:username "admin";
-      mph:password "admin"
+      mph:password "****"
+    ];
+  search:configuration [
+      search:type "metaphacts:sparqlSearch";
+      search:searchBlockTemplate """
+                  ?candidate a ?type.
+                  ?candidate ?keyProp ?key.
+                  (?candidate ?label ?__token__) rdfox:TT \"labels_fti\" .
+  		  FILTER(STR(?key) = ?label)
+		  FILTER ISLITERAL(?key)
+                  BIND(IF(
+                          STRLEN(?key) > STRLEN(?__token__),
+                          STRLEN(?__token__) - STRLEN(?key),
+                          IF(
+                            STRLEN(?key) < STRLEN(?__token__),
+                            STRLEN(?key) - STRLEN(?__token__),
+                            \"0\"
+                          )
+                        )  as ?score_private)
+                  BIND(?key as ?snippet_private)
+                  FILTER(CONTAINS(LCASE(?key), LCASE(?__token__))) .
+      """
+    ];
+  mph:extension [
+      mph:extensionType "metaphacts:ModelingContext"
     ] .
