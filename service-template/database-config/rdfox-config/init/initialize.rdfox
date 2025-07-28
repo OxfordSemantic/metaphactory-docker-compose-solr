@@ -2,3 +2,20 @@ dstore create metaphactory default-graph-name urn:rdfox:default-graph
 active metaphactory
 dsprop set query-validation standard-compliant
 dsprop set invalid-literal-policy as-string
+
+# dsource register my_source type solr \
+#   indexes my_index
+
+## Populate the index with a csv with two columns: item (an IRI) and label (the text label of the item).
+# tupletable create labels_fti \
+#     data-source-name my_source \
+#     index accents \
+#     columns 3 \
+#     "solr.q" "label:*{3}*" \
+#     "solr.rows" 1000 \
+#     "1" "{item}" \
+#     "1.datatype" "iri" \
+#     \
+#     "2" "{label}" \
+#     \
+#     "3.type" "parameter"
