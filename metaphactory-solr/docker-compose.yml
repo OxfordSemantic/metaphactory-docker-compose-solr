@@ -1,0 +1,27 @@
+version: "2.2"
+services:
+  solr:
+    container_name: "${COMPOSE_PROJECT_NAME}-solr"
+    image: "${SOLR_IMAGE}"
+    restart: unless-stopped
+    expose:
+     - "8983"
+    volumes:
+     - solr-directory:/var/solr
+    command:
+     - solr-precreate
+     - labels
+    networks:
+     - metaphactory_network
+    logging:
+      driver: json-file
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  rdfox:
+    depends_on:
+      - solr
+
+volumes:
+  solr-directory:
